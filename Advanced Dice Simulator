@@ -1,0 +1,90 @@
+
+import turtle
+import tkinter as tk
+from random import randint
+import time
+import winsound
+
+# Create a tkinter window
+window = tk.Tk()
+window.title("Advanced Dice Simulator")
+
+# Create a Canvas widget to place the turtle graphics
+canvas = tk.Canvas(window, width=400, height=400)
+canvas.pack()
+
+# Create a Turtle object
+dice = turtle.RawTurtle(canvas)
+dice.hideturtle()
+
+def draw_dice(number):
+    dice.clear()
+    dice.penup()
+    dice.goto(-40, 40)
+    dice.pendown()
+    
+    # Draw the dice border
+    dice.fillcolor("white")
+    dice.begin_fill()
+    for _ in range(4):
+        dice.forward(80)
+        dice.right(90)
+    dice.end_fill()
+    
+    # Define dot positions for different dice numbers
+    dot_positions = {
+        1: [(0, 0)],
+        2: [(-20, 20), (20, -20)],
+        3: [(-20, 20), (0, 0), (20, -20)],
+        4: [(-20, 20), (-20, -20), (20, 20), (20, -20)],
+        5: [(-20, 20), (-20, -20), (0, 0), (20, 20), (20, -20)],
+        6: [(-20, 20), (-20, 0), (-20, -20), (20, 20), (20, 0), (20, -20)]
+    }
+    
+    # Draw dots based on the dice number
+    dots = dot_positions.get(number, [])
+    dice.penup()
+    for x, y in dots:
+        dice.goto(x, y - 10)  # Slightly adjust dot positions
+        dice.pendown()
+        dice.dot(20, "black")
+        dice.penup()
+    
+def roll():
+    winsound.PlaySound("roll_sound.wav", winsound.SND_ASYNC)  # Play rolling sound
+    for _ in range(5):  # Simulate rolling animation
+        result = randint(1, 6)
+        draw_dice(result)
+        window.update()
+        time.sleep(0.2)  # Pause for a short time between frames
+    winsound.PlaySound("roll_end_sound.wav", winsound.SND_ASYNC)  # Play end rolling sound
+    add_roll_to_history(result)
+
+# Create a button to roll the dice
+roll_button = tk.Button(window, text="Roll", command=roll)
+roll_button.pack()
+
+# Create a rolling history list
+rolling_history = []
+
+def add_roll_to_history(result):
+    rolling_history.append(result)
+    if len(rolling_history) > 10:
+        rolling_history.pop(0)
+
+# Create a label to display rolling history
+history_label = tk.Label(window, text="Rolling History:")
+history_label.pack()
+
+history_text = tk.Text(window, height=10, width=30)
+history_text.pack()
+
+def update_history_text():
+    history_text.delete(1.0, tk.END)
+    for roll in rolling_history:
+        history_text.insert(tk.END, f"{roll}\n")
+
+update_history_text()
+
+# Start the tkinter main loop
+window.mainloop()
